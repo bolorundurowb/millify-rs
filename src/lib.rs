@@ -1,50 +1,29 @@
 const DEFAULT_UNITS: [&str; 9] = ["", "k", "m", "g", "t", "p", "e", "z", "y"];
-const DEFAULT_BINARY_UNITS: [&str; 9] = ["",  "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi"];
+const DEFAULT_BINARY_UNITS: [&str; 9] = ["", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi"];
 
 #[derive(Debug)]
 pub struct MillifiedNumber {
     scaled_value: f64,
-    unit_index: usize
+    unit_index: usize,
 }
 
 impl MillifiedNumber {
     pub fn new(scaled_value: f64, unit_index: usize) -> Self {
-        Self { scaled_value, unit_index }
+        Self {
+            scaled_value,
+            unit_index,
+        }
     }
 
     pub fn to_formatted_string(&self) -> String {
-        format!("{:.2} {}", self.scaled_value, DEFAULT_UNITS[self.unit_index])
+        format!(
+            "{:.2} {}",
+            self.scaled_value, DEFAULT_UNITS[self.unit_index]
+        )
     }
 }
 
-/// Represents the scaling bases used for millifying numbers.
-///
-/// This enum defines the two different scaling systems that can be used to
-/// abbreviate large numbers into human-readable formats:
-///
-/// - `Decimal`: Uses a base of 1000 for scaling (e.g., kilo, mega, giga).
-///   Commonly used in contexts like metric systems and general-purpose
-///   numeric formatting.
-///
-/// - `Binary`: Uses a base of 1024 for scaling (e.g., kibibyte, mebibyte, gibibyte).
-///   Typically used in computing contexts, particularly for memory and data
-///   storage representation.
-///
-/// # Variants
-///
-/// - `Decimal = 1000`: Represents the base-1000 (metric) scaling system.
-/// - `Binary = 1024`: Represents the base-1024 (binary) scaling system.
-///
-/// # Example
-/// ```rust
-/// use your_module::MillifyScaleBase;
-///
-/// let scale = MillifyScaleBase::Decimal;
-/// match scale {
-///     MillifyScaleBase::Decimal => println!("Using decimal scaling (1000)."),
-///     MillifyScaleBase::Binary => println!("Using binary scaling (1024)."),
-/// }
-/// ```
+#[derive(PartialEq, Debug)]
 pub enum MillifyScaleBase {
     Decimal = 1000,
     Binary = 1024,
@@ -55,9 +34,34 @@ pub struct MillifyOptions {
     lowercase: bool,
     space_before_unit: bool,
     units: Vec<String>,
-scale_base: MillifyScaleBase,
-    
+    trim_insignificant_zeros: bool,
+    smart_precision: bool,
 }
+
+impl MillifyOptions {
+    pub  fn default(scale_base: Option<MillifyScaleBase>) -> Self {
+        let base = scale_base.unwrap_or(MillifyScaleBase::Decimal);
+        
+        MillifyOptions {
+            precision: 1,
+            lowercase: false,
+            space_before_unit: false,
+            units: (if base == MillifyScaleBase::Decimal { DEFAULT_UNITS } else { DEFAULT_BINARY_UNITS } ).map(String::from).to_vec() ,
+            trim_insignificant_zeros: true,
+            smart_precision: false,
+        }
+    }
+}
+
+pub trait Millify {
+    fn shorten(&self, options: Option<MillifyOptions>) -> String;
+
+    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber;
+
+    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, std::fmt::Error>;
+}
+
+pub fn format_scaled(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {}
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
