@@ -1,3 +1,7 @@
+use std::fmt::Error;
+use rust_decimal::prelude::*;
+use icu::*;
+
 const DEFAULT_UNITS: [&str; 9] = ["", "k", "m", "g", "t", "p", "e", "z", "y"];
 const DEFAULT_BINARY_UNITS: [&str; 9] = ["", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi"];
 
@@ -36,6 +40,7 @@ pub struct MillifyOptions {
     units: Vec<String>,
     trim_insignificant_zeros: bool,
     smart_precision: bool,
+    local_key: Locale
 }
 
 impl MillifyOptions {
@@ -61,7 +66,51 @@ pub trait Millify {
     fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, std::fmt::Error>;
 }
 
-pub fn format_scaled(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {}
+pub fn format_scaled(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {
+    todo!()
+}
+
+impl Millify for i64 {
+    fn shorten(&self, options: Option<MillifyOptions>) -> String {
+        todo!()
+    }
+
+    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
+        todo!()
+    }
+
+    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
+        todo!()
+    }
+}
+
+impl Millify for f64 {
+    fn shorten(&self, options: Option<MillifyOptions>) -> String {
+        todo!()
+    }
+
+    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
+        todo!()
+    }
+
+    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
+        todo!()
+    }
+}
+
+impl Millify for Decimal {
+    fn shorten(&self, options: Option<MillifyOptions>) -> String {
+        todo!()
+    }
+
+    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
+        todo!()
+    }
+
+    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
+        todo!()
+    }
+}
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right

@@ -8,3 +8,5 @@ name="millify"
 crate-type = ["lib"]
 
 [dependencies]
+icu = "2.2.0"
+rust_decimal = "1.42.0"
