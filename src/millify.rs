@@ -1,5 +1,7 @@
 use std::fmt::Error;
 use rust_decimal::Decimal;
+use crate::models::MillifiedNumber::MillifiedNumber;
+use crate::models::MillifyOptions::MillifyOptions;
 
 pub trait Millify {
     fn shorten(&self, options: Option<MillifyOptions>) -> String;

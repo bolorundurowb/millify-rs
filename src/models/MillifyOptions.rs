@@ -1,5 +1,5 @@
 use crate::constants::{DEFAULT_BINARY_UNITS, DEFAULT_UNITS};
-use crate::MillifyScaleBase;
+use crate::enums::MillifyScaleBase;
 
 pub struct MillifyOptions {
     precision: u32,
