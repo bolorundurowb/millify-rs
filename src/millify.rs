@@ -8,7 +8,7 @@ pub trait Millify {
 
     fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber;
 
-    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, std::fmt::Error>;
+    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error>;
 }
 
 pub fn format_scaled(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {
