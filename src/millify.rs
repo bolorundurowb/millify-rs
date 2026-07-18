@@ -1,5 +1,4 @@
 use std::fmt::Error;
-use icu::properties::props::Math;
 use rust_decimal::Decimal;
 use crate::models::MillifiedNumber::MillifiedNumber;
 use crate::models::MillifyOptions::MillifyOptions;
@@ -64,11 +63,24 @@ fn format_scaled_core(millified_number: &MillifiedNumber, options: &MillifyOptio
     let absolute_value = millified_number.scaled_value.abs();
     let effective_precision = get_effective_precision(absolute_value, options.precision, options.smart_precision);
     
-    let formatted_number = format!("{:.precision$}", absolute_value, precision = effective_precision as usize);
-    todo!()
+    let mut formatted_number = format!("{:.precision$}", absolute_value, precision = effective_precision as usize);
+    
+    if options.trim_insignificant_zeros { 
+        formatted_number = formatted_number.trim_end_matches('0').to_string();
+    }
+    
+    if (is_negative) {
+        formatted_number.insert(0, '-');
+    }
+    
+    let mut unit = options.units[millified_number.unit_index].clone();
+    
+    if options.lowercase { 
+        unit = unit.to_lowercase();
+    }
+    
+    format!("{}{}{}", formatted_number, if options.space_before_unit { " " } else { "" }, unit)
 }
-
-fn trim_trailing_insignificant_zeros() -> String {}
 
 fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_smart_precision: bool) -> u32 {
     if use_smart_precision {
