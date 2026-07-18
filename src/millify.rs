@@ -63,8 +63,12 @@ fn format_scaled_core(millified_number: &MillifiedNumber, options: &MillifyOptio
     let is_negative = millified_number.scaled_value < 0.0;
     let absolute_value = millified_number.scaled_value.abs();
     let effective_precision = get_effective_precision(absolute_value, options.precision, options.smart_precision);
+    
+    let formatted_number = format!("{:.precision$}", absolute_value, precision = effective_precision as usize);
     todo!()
 }
+
+fn trim_trailing_insignificant_zeros() -> String {}
 
 fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_smart_precision: bool) -> u32 {
     if use_smart_precision {
@@ -81,5 +85,5 @@ fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_s
         }
     }
     
-    return max_precision;
+    max_precision
 }
