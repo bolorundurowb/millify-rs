@@ -1,7 +1,15 @@
-use std::fmt::Error;
-use rust_decimal::Decimal;
 use crate::models::MillifiedNumber::MillifiedNumber;
 use crate::models::MillifyOptions::MillifyOptions;
+use num_traits::Num;
+use rust_decimal::Decimal;
+use std::fmt::{Display, Error};
+
+pub fn decompose<T>(input: T, millify_options: Option<MillifyOptions>) -> MillifiedNumber
+where
+    T: Num + Display + Clone,
+{
+    todo!();
+}
 
 pub trait Millify {
     fn shorten(&self, options: Option<MillifyOptions>) -> String;
@@ -53,7 +61,10 @@ impl Millify for Decimal {
     }
 }
 
-pub fn format_scaled(millified_number: &MillifiedNumber, options: Option<MillifyOptions>) -> String {
+pub fn format_scaled(
+    millified_number: &MillifiedNumber,
+    options: Option<MillifyOptions>,
+) -> String {
     let options = options.unwrap_or(MillifyOptions::default(None));
     format_scaled_core(millified_number, &options)
 }
@@ -61,28 +72,42 @@ pub fn format_scaled(millified_number: &MillifiedNumber, options: Option<Millify
 fn format_scaled_core(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {
     let is_negative = millified_number.scaled_value < 0.0;
     let absolute_value = millified_number.scaled_value.abs();
-    let effective_precision = get_effective_precision(absolute_value, options.precision, options.smart_precision);
-    
-    let mut formatted_number = format!("{:.precision$}", absolute_value, precision = effective_precision as usize);
-    
-    if options.trim_insignificant_zeros { 
+    let effective_precision =
+        get_effective_precision(absolute_value, options.precision, options.smart_precision);
+
+    let mut formatted_number = format!(
+        "{:.precision$}",
+        absolute_value,
+        precision = effective_precision as usize
+    );
+
+    if options.trim_insignificant_zeros {
         formatted_number = formatted_number.trim_end_matches('0').to_string();
     }
-    
+
     if (is_negative) {
         formatted_number.insert(0, '-');
     }
-    
+
     let mut unit = options.units[millified_number.unit_index].clone();
-    
-    if options.lowercase { 
+
+    if options.lowercase {
         unit = unit.to_lowercase();
     }
-    
-    format!("{}{}{}", formatted_number, if options.space_before_unit { " " } else { "" }, unit)
+
+    format!(
+        "{}{}{}",
+        formatted_number,
+        if options.space_before_unit { " " } else { "" },
+        unit
+    )
 }
 
-fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_smart_precision: bool) -> u32 {
+fn get_effective_precision(
+    absolute_scaled_value: f64,
+    max_precision: u32,
+    use_smart_precision: bool,
+) -> u32 {
     if use_smart_precision {
         if absolute_scaled_value >= 100f64 {
             return 0;
@@ -96,6 +121,6 @@ fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_s
             return max_precision;
         }
     }
-    
+
     max_precision
 }
