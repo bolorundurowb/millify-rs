@@ -2,8 +2,8 @@ use crate::constants::DEFAULT_UNITS;
 
 #[derive(Debug)]
 pub struct MillifiedNumber {
-    scaled_value: f64,
-    unit_index: usize,
+    pub  scaled_value: f64,
+    pub  unit_index: usize
 }
 
 impl MillifiedNumber {

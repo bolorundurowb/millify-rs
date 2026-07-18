@@ -1,4 +1,5 @@
 use std::fmt::Error;
+use icu::properties::props::Math;
 use rust_decimal::Decimal;
 use crate::models::MillifiedNumber::MillifiedNumber;
 use crate::models::MillifyOptions::MillifyOptions;
@@ -9,10 +10,6 @@ pub trait Millify {
     fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber;
 
     fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error>;
-}
-
-pub fn format_scaled(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {
-    todo!()
 }
 
 impl Millify for i64 {
@@ -55,4 +52,34 @@ impl Millify for Decimal {
     fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
         todo!()
     }
+}
+
+pub fn format_scaled(millified_number: &MillifiedNumber, options: Option<MillifyOptions>) -> String {
+    let options = options.unwrap_or(MillifyOptions::default(None));
+    format_scaled_core(millified_number, &options)
+}
+
+fn format_scaled_core(millified_number: &MillifiedNumber, options: &MillifyOptions) -> String {
+    let is_negative = millified_number.scaled_value < 0.0;
+    let absolute_value = millified_number.scaled_value.abs();
+    let effective_precision = get_effective_precision(absolute_value, options.precision, options.smart_precision);
+    todo!()
+}
+
+fn get_effective_precision(absolute_scaled_value: f64, max_precision: u32, use_smart_precision: bool) -> u32 {
+    if use_smart_precision {
+        if absolute_scaled_value >= 100f64 {
+            return 0;
+        }
+
+        if absolute_scaled_value >= 10f64 {
+            return 1.min(max_precision);
+        }
+
+        if absolute_scaled_value >= 1f64 {
+            return max_precision;
+        }
+    }
+    
+    return max_precision;
 }

@@ -2,12 +2,12 @@ use crate::constants::{DEFAULT_BINARY_UNITS, DEFAULT_UNITS};
 use crate::enums::MillifyScaleBase;
 
 pub struct MillifyOptions {
-    precision: u32,
-    lowercase: bool,
-    space_before_unit: bool,
-    units: Vec<String>,
-    trim_insignificant_zeros: bool,
-    smart_precision: bool,
+    pub  precision: u32,
+    pub  lowercase: bool,
+    pub  space_before_unit: bool,
+    pub  units: Vec<String>,
+    pub  trim_insignificant_zeros: bool,
+    pub  smart_precision: bool,
     // local_key: Locale
 }
 
