@@ -1,6 +1,6 @@
 use std::fmt::Error;
 use rust_decimal::prelude::*;
-use icu::*;
+use icu::locale::Locale;
 
 const DEFAULT_UNITS: [&str; 9] = ["", "k", "m", "g", "t", "p", "e", "z", "y"];
 const DEFAULT_BINARY_UNITS: [&str; 9] = ["", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi"];
@@ -40,7 +40,7 @@ pub struct MillifyOptions {
     units: Vec<String>,
     trim_insignificant_zeros: bool,
     smart_precision: bool,
-    local_key: Locale
+    // local_key: Locale
 }
 
 impl MillifyOptions {
@@ -53,7 +53,7 @@ impl MillifyOptions {
             space_before_unit: false,
             units: (if base == MillifyScaleBase::Decimal { DEFAULT_UNITS } else { DEFAULT_BINARY_UNITS } ).map(String::from).to_vec() ,
             trim_insignificant_zeros: true,
-            smart_precision: false,
+            smart_precision: false
         }
     }
 }
