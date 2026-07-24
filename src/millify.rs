@@ -2,13 +2,41 @@ use crate::models::MillifiedNumber::MillifiedNumber;
 use crate::models::MillifyOptions::MillifyOptions;
 use num_traits::Num;
 use rust_decimal::Decimal;
-use std::fmt::{Display, Error};
+use std::fmt::{Debug, Display, Error};
+use num_traits::real::Real;
+use crate::enums::MillifyScaleBase;
 
 pub fn decompose<T>(input: T, millify_options: Option<MillifyOptions>) -> MillifiedNumber
 where
+    T: Num + Display + Clone + PartialOrd,
+{
+    let millify_options = millify_options.unwrap_or(MillifyOptions::default(None));
+    let divisor: i32 = if (millify_options.scale_base == MillifyScaleBase::Decimal) {1000} else {1024};
+    let is_negative = input < 0;
+    let mut absolute_value = input.abs();
+    let mut unit_index: usize = 0;
+
+    while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
+        absolute_value /= divisor;
+        unit_index += 1;
+    }
+    
+    if is_negative { 
+        absolute_value *= -1;
+    }
+    
+    MillifiedNumber {
+        scaled_value: absolute_value,
+        unit_index,
+    }
+}
+
+pub fn shorten<T>(input: T, millify_options: Option<MillifyOptions>) -> String
+where 
     T: Num + Display + Clone,
 {
-    todo!();
+    let millified_number = decompose(input, millify_options.clone());
+    format_scaled(&millified_number, millify_options)
 }
 
 pub trait Millify {
