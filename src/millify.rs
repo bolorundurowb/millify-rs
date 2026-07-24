@@ -6,94 +6,56 @@ use std::fmt::{Debug, Display, Error};
 use num_traits::real::Real;
 use crate::enums::MillifyScaleBase;
 
-pub fn decompose<T>(input: T, millify_options: Option<MillifyOptions>) -> MillifiedNumber
-where
-    T: Num + Display + Clone + PartialOrd,
-{
-    let millify_options = millify_options.unwrap_or(MillifyOptions::default(None));
-    let divisor: i32 = if (millify_options.scale_base == MillifyScaleBase::Decimal) {1000} else {1024};
-    let is_negative = input < 0;
-    let mut absolute_value = input.abs();
-    let mut unit_index: usize = 0;
+pub trait Millify {
+    fn shorten(&self, options: impl Into<Option<MillifyOptions>>) -> String;
 
-    while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
-        absolute_value /= divisor;
-        unit_index += 1;
-    }
-    
-    if is_negative { 
-        absolute_value *= -1;
-    }
-    
-    MillifiedNumber {
-        scaled_value: absolute_value,
-        unit_index,
-    }
+    fn decompose(&self, options: impl Into<Option<MillifyOptions>>) -> MillifiedNumber;
+
+    fn try_format(&self, options: impl Into<Option<MillifyOptions>>) -> Result<String, Error>;
 }
 
-pub fn shorten<T>(input: T, millify_options: Option<MillifyOptions>) -> String
-where 
+impl<T> Millify for T
+where
     T: Num + Display + Clone,
 {
-    let millified_number = decompose(input, millify_options.clone());
-    format_scaled(&millified_number, millify_options)
-}
-
-pub trait Millify {
-    fn shorten(&self, options: Option<MillifyOptions>) -> String;
-
-    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber;
-
-    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error>;
-}
-
-impl Millify for i64 {
-    fn shorten(&self, options: Option<MillifyOptions>) -> String {
+    fn shorten(&self, options: impl Into<Option<MillifyOptions>>) -> String {
         todo!()
     }
 
-    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
-        todo!()
+    fn decompose(&self, options: impl Into<Option<MillifyOptions>>) -> MillifiedNumber {
+        let options = options.into();
+        let millify_options = options.unwrap_or_default();
+        
+        let divisor: i32 = if (millify_options.scale_base == MillifyScaleBase::Decimal) {1000} else {1024};
+        let is_negative = self < 0;
+        let mut absolute_value = self.abs();
+        let mut unit_index: usize = 0;
+
+        while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
+            absolute_value /= divisor;
+            unit_index += 1;
+        }
+
+        if is_negative {
+            absolute_value *= -1;
+        }
+
+        MillifiedNumber {
+            scaled_value: absolute_value,
+            unit_index,
+        }
     }
 
-    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
-        todo!()
-    }
-}
-
-impl Millify for f64 {
-    fn shorten(&self, options: Option<MillifyOptions>) -> String {
-        todo!()
-    }
-
-    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
-        todo!()
-    }
-
-    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
-        todo!()
-    }
-}
-
-impl Millify for Decimal {
-    fn shorten(&self, options: Option<MillifyOptions>) -> String {
-        todo!()
-    }
-
-    fn decompose(&self, options: Option<MillifyOptions>) -> MillifiedNumber {
-        todo!()
-    }
-
-    fn try_format(&self, options: Option<MillifyOptions>) -> Result<String, Error> {
+    fn try_format(&self, options: impl Into<Option<MillifyOptions>>) -> Result<String, Error> {
         todo!()
     }
 }
 
 pub fn format_scaled(
     millified_number: &MillifiedNumber,
-    options: Option<MillifyOptions>,
+    options: impl Into<Option<MillifyOptions>>,
 ) -> String {
-    let options = options.unwrap_or(MillifyOptions::default(None));
+    let options = options.into().unwrap_or_default();
     format_scaled_core(millified_number, &options)
 }
 
