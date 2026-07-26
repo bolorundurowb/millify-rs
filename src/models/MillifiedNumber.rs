@@ -1,9 +1,14 @@
 use crate::constants::DEFAULT_UNITS;
+#[cfg(feature = "rust_decimal")]
+use rust_decimal::Decimal;
 
 #[derive(Debug)]
 pub struct MillifiedNumber {
-    pub  scaled_value: f64,
-    pub  unit_index: usize
+    #[cfg(feature = "rust_decimal")]
+    pub scaled_value: Decimal,
+    #[cfg(not(feature = "rust_decimal"))]
+    pub scaled_value: f64,
+    pub unit_index: usize,
 }
 
 impl MillifiedNumber {

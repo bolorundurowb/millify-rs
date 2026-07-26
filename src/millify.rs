@@ -1,10 +1,10 @@
+use crate::enums::MillifyScaleBase;
 use crate::models::MillifiedNumber::MillifiedNumber;
 use crate::models::MillifyOptions::MillifyOptions;
-use num_traits::Num;
+use num_traits::{FromPrimitive, Num, Signed, ToPrimitive};
+#[cfg(feature = "rust_decimal")]
 use rust_decimal::Decimal;
-use std::fmt::{Debug, Display, Error};
-use num_traits::real::Real;
-use crate::enums::MillifyScaleBase;
+use std::fmt::{Display, Error};
 
 pub trait Millify {
     fn shorten(&self, options: impl Into<Option<MillifyOptions>>) -> String;
@@ -16,7 +16,7 @@ pub trait Millify {
 
 impl<T> Millify for T
 where
-    T: Num + Display + Clone,
+    T: Num + Display + PartialOrd + FromPrimitive + Signed + Clone + ToPrimitive,
 {
     fn shorten(&self, options: impl Into<Option<MillifyOptions>>) -> String {
         todo!()
@@ -25,24 +25,60 @@ where
     fn decompose(&self, options: impl Into<Option<MillifyOptions>>) -> MillifiedNumber {
         let options = options.into();
         let millify_options = options.unwrap_or_default();
-        
-        let divisor: i32 = if (millify_options.scale_base == MillifyScaleBase::Decimal) {1000} else {1024};
-        let is_negative = self < 0;
-        let mut absolute_value = self.abs();
-        let mut unit_index: usize = 0;
 
-        while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
-            absolute_value /= divisor;
-            unit_index += 1;
+        let base_val = if (millify_options.scale_base == MillifyScaleBase::Decimal) {
+            1000
+        } else {
+            1024
+        };
+
+        #[cfg(feature = "rust_decimal")]
+        {
+            let divisor = T::from(Decimal::from(base_val));
+            let zero = T::zero();
+            let is_negative = self < &zero;
+            let mut absolute_value = self.abs();
+            let mut unit_index: usize = 0;
+
+            while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
+                absolute_value = absolute_value / divisor.clone();
+                unit_index += 1;
+            }
+
+            if is_negative {
+                absolute_value = zero - absolute_value;
+            }
+
+            MillifiedNumber {
+                scaled_value: T::to(absolute_value)
+                    .expect("Failed to convert absolute value to f64"),
+                unit_index,
+            }
         }
 
-        if is_negative {
-            absolute_value *= -1;
-        }
+        #[cfg(not(feature = "rust_decimal"))]
+        {
+            let divisor =
+                T::from_f64(base_val as f64).expect("Failed to convert base value to f64");
+            let zero = T::zero();
+            let is_negative = self < &zero;
+            let mut absolute_value = self.abs();
+            let mut unit_index: usize = 0;
 
-        MillifiedNumber {
-            scaled_value: absolute_value,
-            unit_index,
+            while absolute_value >= divisor && unit_index < millify_options.units.len() - 1 {
+                absolute_value = absolute_value / divisor.clone();
+                unit_index += 1;
+            }
+
+            if is_negative {
+                absolute_value = zero - absolute_value;
+            }
+
+            MillifiedNumber {
+                scaled_value: T::to_f64(&absolute_value)
+                    .expect("Failed to convert absolute value to f64"),
+                unit_index,
+            }
         }
     }
 

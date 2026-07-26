@@ -21,8 +21,8 @@ impl Default for MillifyOptions {
         } else {
             DEFAULT_BINARY_UNITS
         })
-            .map(String::from)
-            .to_vec();
+        .map(String::from)
+        .to_vec();
 
         MillifyOptions {
             precision: 1,
